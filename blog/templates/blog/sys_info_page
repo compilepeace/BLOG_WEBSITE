@@ -1,0 +1,162 @@
+#!/bin/bash
+
+# Program to o/p a system information page
+
+
+
+
+
+PROGNAME=$(basename $0)
+TITLE="System Information Report for $HOSTNAME"
+CURRENT_TIME=$(date +"%x %r %Z")
+TIMESTAMP="Generated $CURRENT_TIME by $USERNAME"
+
+
+
+
+
+# 3 Functions 
+report_uptime()
+{
+	cat <<- _EOF_
+		<h2>System Uptime</h2>
+		<pre>$(uptime)</pre>
+		_EOF_
+	return	
+}
+
+report_diskspace()
+{
+	cat <<- _EOF_
+		<h2>Disk Space Utilization</h2>
+		<pre>$(df -h)</pre>
+		_EOF_
+	return 	
+}
+
+report_home_space()
+{
+	if [[ $(id -u) -eq 0 ]]; then
+		cat <<- _EOF_
+			<h2>Home Space Utilization(ALL USERS)</h2>
+			<pre>$(du -sh /root/*)</pre>
+			_EOF_
+	
+	else
+		cat <<- _EOF_
+			<h2>Home Space Utilization ($USER)</h2>
+			<pre>$(du -sh $HOME)</pre>
+			_EOF_
+	fi		
+	return	
+}
+
+
+
+
+
+# Function for help option
+usage()
+{
+	echo "$PROGNAME: Usage: $PROGNAME [-f file | -i]"
+	return
+}
+
+
+
+
+
+# Function to generate html output
+write_html()
+{
+	cat <<- _EOF_
+
+	<html>
+			<head>
+				<title>$TITLE</title>
+			</head>
+			
+			<body>
+	 			<h1>Hey, this is $TITLE</h1>
+				<p>$TIMESTAMP</p>
+				$(report_uptime)
+				$(report_diskspace)
+				$(report_home_space)
+			</body>
+	</html>
+	_EOF_
+	return 
+
+}
+
+
+
+
+
+	# Process command line options
+	interactive=
+	filename=
+	while [[ -n $1 ]]; do
+		case $1 in
+			-f | --file)		shift
+								filename=$1
+								;;
+			-i | --interactive) interactive=1
+								;;
+			-h | --help)		usage
+								exit
+								;;
+			*)					usage >&2
+								exit 1
+								;;
+		esac
+		shift
+	done
+
+
+
+
+
+	# Interactive mode
+	if [[ -n interactive ]]; then
+		while true; do
+			read -p "Enter name of the output file: " filename
+			
+			if [[ -e $filename ]]; then
+				read -p "'$filename' exists. Overwrite? [y/n/q] -> "
+				case $REPLY in 
+					Y|y) break
+						 ;;
+					Q|q) echo "Program Terminated."
+						 exit 
+						 ;;
+					*)   continue
+						 ;;
+				esac
+		
+			elif [[ -z $filename ]]; then
+				continue
+		
+			else 
+				break
+			
+			fi
+		done
+	fi
+
+
+
+
+
+	# Output html page
+	if [[ -n $filename ]]; then
+	
+		if touch $filename && [[ -f $filename ]]; then
+			write_html > $filename
+		else
+			echo "$PROGNAME: Cannot write file '$filename'" >&2
+			exit 1
+		fi
+	else
+		write_html 
+	fi	
