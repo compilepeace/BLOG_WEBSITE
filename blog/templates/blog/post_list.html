@@ -1,24 +1,13 @@
-<html>
-    <head>
-        <title>Abhinav's Blog</title>
-    </head>
-    <body>
-        <div>
-            <h1><a href="">Abhinav's Blog</a></h1>
-        </div>
+{% extends 'blog/base.html' %}
 
 
-
-        {% for post in posts %}
-            
-            <div>            
+    {% for post in posts %}
+                    <div class="post">
+                            <div class="date">
+                        <p>published: {{ post.published_date }}</p>
+                   </div>
                 <h1><a href="">{{ post.title }}</a></h1>
-                <p>{{ post.text|linebreaksbr }}</p>     
-                <p>published: {{ post.published_date }}</p>          
-            </div>    
-        
-        {% endfor %}
-        
-        
-    </body>
-</html>
+            <p>{{ post.text|linebreaksbr }}</p>
+        </div>
+    {% endfor %}
+                
