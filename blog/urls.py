@@ -11,7 +11,7 @@ urlpatterns = [
 	# This pattern will tell django that 'views.post.list' is the right place
 	# When someone visits 'http:127.0.0.1:8000/' 
 	# name='post_list' is the name used to identify the url used to identify view
-	url(r'^$', views.sys_info_page, name='sys_info_page'),
-	url(r'^post$', views.post_list, name='post_list'),
-
+	url(r'^sys_info_page$', views.sys_info_page, name='sys_info_page'),
+	url(r'^$', views.post_list, name='post_list'),
+	url(r'^post/(?P<pk>\d+)/$', views.post_detail, name='post_detail'),
 ]
